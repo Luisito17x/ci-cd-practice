@@ -3,13 +3,19 @@ name: Deploy to GitHub Pages
 on:
   workflow_run:
     workflows: ["CI Pipeline"]
-    types:
-      - completed
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
@@ -17,10 +23,11 @@ jobs:
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v3
 
-      - name: Subir archivos a Pages
-        uses: actions/upload-pages-artifact@v1
+      - name: Subir artefacto para Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '.'  # ajusta aquí al directorio con tu sitio estático si no es la raíz (ej. ./dist o ./public)
 
       - name: Desplegar en Pages
-        uses: actions/deploy-pages@v2
+        id: deployment
+        uses: actions/deploy-pages@v4
